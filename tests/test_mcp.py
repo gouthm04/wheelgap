@@ -11,7 +11,7 @@ from conftest import FAKE_INDEX
 from test_deps import INDEX, LINUX, WIN_AMD, WIN_ARM, index, release  # noqa: F401  (index: --deps' fake PyPI)
 from test_dist import LINUX_WHEEL, SDIST, WIN_ARM_WHEEL, dist
 
-from wheelgap import __version__, mcp
+from wheelgap import __version__, cli, mcp
 
 
 def run(*messages: object, raw: bytes = b"") -> list:
@@ -749,6 +749,23 @@ def test_check_lockfile_passes_on_notes(fake_pypi, fixtures):
     assert "may show false gaps" in notes[0]
     assert notes[1] == "2 packages weren't checked (see skipped); ok covers the others only"
     assert not fake_pypi
+
+
+@pytest.mark.parametrize("force_color", [False, True])
+def test_check_lockfile_keeps_dimmed_notes_with_force_color(fake_pypi, tmp_path, monkeypatch, force_color):
+    # A dimmed note is prefixed with an ANSI escape when FORCE_COLOR is set, so _run_cli would no longer
+    # recognise it as "wheelgap: note:" and would drop it (#449). Have the CLI emit one through its
+    # --build-info lookup (build-info in the project, --explain from dependencies) and check it survives.
+    if force_color:
+        monkeypatch.setenv("FORCE_COLOR", "1")
+    project = tmp_path / "proj"
+    project.mkdir()
+    (project / "pyproject.toml").write_text("[tool.wheelgap]\nbuild-info = true\n", encoding="utf-8")
+    (project / "requirements.txt").write_text("demo==1.0\n", encoding="utf-8")
+    monkeypatch.setattr(cli, "lookup_all", lambda *a, **k: (None, "the lookup deadline passed"))
+    (_, reply) = run(init(), call("check_lockfile", path=str(project), dependencies=True))
+    notes = reply["result"]["structuredContent"]["notes"]
+    assert any("the lookup deadline passed" in note for note in notes)
 
 
 def test_check_lockfile_explicit_python_beats_python_version_file(fake_pypi, tmp_path, fixtures):

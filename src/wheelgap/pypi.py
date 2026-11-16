@@ -300,6 +300,33 @@ _ISSUE_KEYS = (
     "gitlabissues",
 )
 _REPO_KEYS = ("source", "sourcecode", "code", "repository", "homepage", "home")
+_GITHUB_RESERVED_PATHS = frozenset(
+    {
+        "about",
+        "apps",
+        "collections",
+        "explore",
+        "features",
+        "login",
+        "marketplace",
+        "notifications",
+        "orgs",
+        "pricing",
+        "search",
+        "settings",
+        "site",
+        "sponsors",
+        "topics",
+        "users",
+        "enterprise",
+        "security",
+        "trending",
+        "readme",
+        "contact",
+        "join",
+        "signup",
+    }
+)
 _LABEL_DROP = str.maketrans("", "", string.punctuation + string.whitespace)
 
 
@@ -355,6 +382,8 @@ def extract_issues_url(project_urls: dict[str, str] | None, homepage: str | None
             segments = [s for s in parsed.path.strip("/").split("/") if s]
             if len(segments) >= 2:
                 owner, repo = segments[0], segments[1].removesuffix(".git")
+                if owner.lower() in _GITHUB_RESERVED_PATHS:
+                    continue
                 return f"https://github.com/{owner}/{repo}/issues"
 
     return None

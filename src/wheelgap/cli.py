@@ -1872,10 +1872,9 @@ def _main(argv: list[str], project: Path | None = None) -> int:
             if args.online:
                 raise SourceError("--dist checks the files in DIR as they are; --online would check PyPI's instead")
             if offline:
-                raise SourceError(
-                    f"{offline_how}: --dist looks the last release up on PyPI; drop --dist, "
-                    f"or {undo_offline(offline_how)}"
-                )
+                # --dist refuses --online too (above), so the config key's way out is the key itself.
+                undo = "drop --offline" if args.offline else "set offline = false in [tool.wheelgap] (or drop the key)"
+                raise SourceError(f"{offline_how}: --dist looks the last release up on PyPI; drop --dist, or {undo}")
             if index_url is not None:
                 raise SourceError(
                     "--dist's last-release check reads PyPI's JSON API, which a simple index (--index-url, or "

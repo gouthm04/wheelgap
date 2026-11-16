@@ -808,6 +808,15 @@ def test_extract_issues_url_github_fallback():
         == "https://github.com/org/repo/issues"
     )
     assert pypi.extract_issues_url(None, homepage="https://github.com/org/repo") == "https://github.com/org/repo/issues"
+    assert (
+        pypi.extract_issues_url({"Source": "https://github.com/org/repo/tree/main/docs"})
+        == "https://github.com/org/repo/issues"
+    )
+
+
+@pytest.mark.parametrize("path", ["sponsors/someone", "orgs/pallets/projects", "users/someone/projects/1"])
+def test_extract_issues_url_skips_github_reserved_paths(path):
+    assert pypi.extract_issues_url(None, homepage=f"https://github.com/{path}") is None
 
 
 def test_extract_issues_url_refuses_control_characters():
@@ -868,3 +877,11 @@ def test_extract_issues_url_takes_the_first_valid_of_labels_that_normalise_alike
     # "Issues" with an http URL and "issues" with an https one: the https one, as before label normalisation.
     urls = {"Issues": "http://bugs.example.com/", "issues": "https://bugs.example.com/"}
     assert pypi.extract_issues_url(urls) == "https://bugs.example.com/"
+
+
+def test_extract_issues_url_a_reserved_path_doesnt_hide_a_later_repository():
+    # Skipped, not the end: the homepage argument after a sponsors Source still gives the repo's tracker.
+    assert (
+        pypi.extract_issues_url({"Source": "https://github.com/sponsors/x"}, homepage="https://github.com/org/repo")
+        == "https://github.com/org/repo/issues"
+    )

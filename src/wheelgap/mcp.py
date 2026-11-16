@@ -709,8 +709,7 @@ def _check_dist(args: dict[str, Any]) -> dict[str, Any]:
     dist = _existing(_string(args, "path", required=True) or "")
     if not dist.is_dir():
         raise ToolError(f"{args['path']}: is not a folder (pass the folder of built files)")
-    # --color=never: a dim() note under FORCE_COLOR would no longer start "wheelgap: " and would be lost.
-    argv = ["--json", "--color=never", f"--dist={dist}"]
+    argv = ["--json", f"--dist={dist}"]
     argv += [f"--python={p}" for p in _pythons(args)]
     argv += [f"--target={p}" for p in _platforms(args)]
     argv += [f"--{key}={value}" for key, value in _versions(args).items()]
@@ -819,6 +818,9 @@ def _run_cli(argv: list[str], path: Path, *, positional: bool = True, project: P
     settings then come from PROJECT, never the server's working directory (another project's)."""
     from . import cli
 
+    # --color=never: a dim() note under FORCE_COLOR starts with an ANSI escape instead of "wheelgap: ",
+    # so it would be dropped from notes. _run_cli parses every tool's stderr, so set it here for all of them.
+    argv = ["--color=never", *argv]
     argv = [*argv, "--", str(path)] if positional else argv
     out, err = io.StringIO(), io.StringIO()
     try:

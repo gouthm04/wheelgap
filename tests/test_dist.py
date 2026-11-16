@@ -106,9 +106,23 @@ def test_dist_takes_no_other_inputs(fake_pypi, capsys, tmp_path):
 def test_dist_needs_the_json_api(fake_pypi, capsys, tmp_path):
     folder = dist(tmp_path, LINUX_WHEEL)
     assert check(folder, "--offline") == 2
-    assert "--offline: --dist looks the last release up on PyPI" in capsys.readouterr().err
+    assert "--offline: --dist looks the last release up on PyPI; drop --dist, or drop --offline" in (
+        capsys.readouterr().err
+    )
     assert check(folder, "--index-url", "https://example.org/simple") == 2
     assert "a simple index" in capsys.readouterr().err
+
+
+def test_dist_offline_config_advises_the_key_not_online(fake_pypi, capsys, tmp_path, monkeypatch):
+    # --dist refuses --online too, so the config key's advice is the key itself, never --online (#447).
+    (tmp_path / "pyproject.toml").write_text("[tool.wheelgap]\noffline = true\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    folder = dist(tmp_path, LINUX_WHEEL)
+    assert check(folder) == 2
+    err = capsys.readouterr().err
+    assert "offline = true in [tool.wheelgap]: --dist looks the last release up on PyPI" in err
+    assert "set offline = false in [tool.wheelgap]" in err
+    assert "--online" not in err
 
 
 def test_a_maintenance_release_is_compared_with_the_release_before_it(fake_pypi, capsys, tmp_path):
