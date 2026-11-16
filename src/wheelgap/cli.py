@@ -259,7 +259,6 @@ def make_parser() -> argparse.ArgumentParser:
         help="with --explain, read the sdist of each package that builds from source to say what the build needs "
         "(downloads them from PyPI; also build-info = true; --no-build-info overrides build-info = true)",
     )
-
     p.add_argument(
         "--conda-forge",
         action="store_true",

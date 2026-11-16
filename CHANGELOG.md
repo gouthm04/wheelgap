@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- `--no-build-info` turns off `build-info = true` from `[tool.wheelgap]` for one run, and MCP `check_lockfile` with `dependencies: true` passes `--no-build-info` so it never downloads sdists. (#450)
+- `--no-build-info` turns off `build-info = true` from `[tool.wheelgap]` for one run, and MCP `check_lockfile` with `dependencies: true` passes `--no-build-info` so it never downloads sdists. (#465, thanks [@gouthm04](https://github.com/gouthm04))
 
 ## 0.13.0 (2026-11-16)
 
