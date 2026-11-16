@@ -856,6 +856,9 @@ def test_build_info_is_opt_in(capsys, tmp_path, fake_files):
     assert json.loads(out)["packages"][0]["build_requires"] == ["maturin<2,>=1"]
     _, out, _ = run(capsys, str(tmp_path), *TARGETS, "--explain", "--markdown")
     assert "build needs: at least a Rust toolchain (maturin<2,>=1)" in out
+    fake_files.calls.clear()
+    _, out, _ = run(capsys, str(tmp_path), *TARGETS, "--explain", "--no-build-info", "--no-cache")
+    assert "build needs" not in out and fake_files.calls == []
 
 
 def test_looked_up_packages_use_the_json_api(capsys, tmp_path, fake_pypi, fake_files):

@@ -2536,3 +2536,24 @@ def test_check_package_dependencies_counts_every_release_of_the_package_asked_ab
     assert data["results"] == {"3.14 win-arm64": "wheel", "3.15 win-arm64": "source"}
     assert data["versions"] == ["1.0", "2.0"]
     assert data["dependencies_checked"] == 0
+
+
+def test_check_lockfile_dependencies_skips_build_info_when_configured(fake_pypi, fake_files, tmp_path):
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\nversion = "0.1.0"\ndependencies = ["nowheels==0.9"]\n\n'
+        "[tool.wheelgap]\nbuild-info = true\n",
+        encoding="utf-8",
+    )
+    (_, reply) = run(
+        init(),
+        call(
+            "check_lockfile",
+            path=str(tmp_path / "pyproject.toml"),
+            python="3.13",
+            targets=["linux-x86_64"],
+            dependencies=True,
+        ),
+    )
+    data = reply["result"]["structuredContent"]
+    assert data["ok"] is False
+    assert fake_files.calls == []

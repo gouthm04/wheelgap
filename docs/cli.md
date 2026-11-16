@@ -296,13 +296,13 @@ same file: whether exactly that release built from its sdist and imported on Git
 the lab's dated observations on GitHub's runners, which have compilers and many system libraries preinstalled, so a
 build that works there can still need setup on your machine. Nothing the lab built is downloaded.
 
-### `--build-info` {#build-info}
+### `--build-info`, `--no-build-info` {#build-info}
 
 With `--explain`, also say what each `source` build needs (`build needs: at least a Rust toolchain
 (maturin<2.0,>=1.9)`), from the `[build-system]` table of the sdist's `pyproject.toml`. It downloads sdists, so it's
 opt-in, and only for packages that pass [the PyPI-origin rule](how-it-works.md#pypi-origin); it's off with `--offline`,
 `--index-url`, `WHEELGAP_INDEX_URL` or a pip or uv index setting in the environment. `build-info = true` in
-`[tool.wheelgap]` turns it on by default. See [Build requirements](output.md#build-info).
+`[tool.wheelgap]` turns it on by default; `--no-build-info` turns it off. See [Build requirements](output.md#build-info).
 
 ### `--suggest`, `--no-suggest` {#suggest}
 

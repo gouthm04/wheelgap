@@ -630,7 +630,7 @@ def _check_lockfile(args: dict[str, Any]) -> dict[str, Any]:
         # The CLI writes a gap's 'via' only under --explain. Avoid --deps' automatic release suggestions and the
         # tracker's notes (they'd send the tree's names to wheelgap.github.io); the tool needs the paths only, and
         # _run_cli drops --explain's other keys.
-        argv += ["--deps", "--explain", "--no-suggest", "--no-notes"]
+        argv += ["--deps", "--explain", "--no-suggest", "--no-notes", "--no-build-info"]
     return _run_cli(argv, path)
 
 

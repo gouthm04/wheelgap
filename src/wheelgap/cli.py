@@ -254,10 +254,12 @@ def make_parser() -> argparse.ArgumentParser:
     p.add_argument("--explain", action="store_true", help="for each gap, list the wheels that were rejected and why")
     p.add_argument(
         "--build-info",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
+        default=None,
         help="with --explain, read the sdist of each package that builds from source to say what the build needs "
-        "(downloads them from PyPI; also build-info = true)",
+        "(downloads them from PyPI; also build-info = true; --no-build-info overrides build-info = true)",
     )
+
     p.add_argument(
         "--conda-forge",
         action="store_true",
@@ -2165,11 +2167,12 @@ def _main(argv: list[str], project: Path | None = None) -> int:
 
     build_info: dict[int, BuildInfo] | None = None  # None: not asked for
     off_by = origin.other_index(index_url) or origin.index_env()  # no package counts as PyPI's for sure
-    if args.explain and (args.build_info or config.get("build-info", False)) and not offline and off_by:
+    want_build_info = args.build_info if args.build_info is not None else config.get("build-info", False)
+    if args.explain and want_build_info and not offline and off_by:
         if not quiet:
             note = f"wheelgap: note: --build-info is off: packages may come from another index ({off_by})"
             print(Style(use_color(args.color)).dim(note), file=sys.stderr)
-    elif args.explain and (args.build_info or config.get("build-info", False)) and not offline:
+    elif args.explain and want_build_info and not offline:
         # What each explained `source` release needs to build, from its sdist (only for packages positively from
         # PyPI: see build.where). Nothing here changes the exit code, and a release whose sdist gives no answer just
         # gets no line.
